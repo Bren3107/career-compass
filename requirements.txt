@@ -1,0 +1,14 @@
+# Install sentence-transformers FIRST — it pins torch/transformers/accelerate versions.
+# Installing other packages before it causes silent version conflicts.
+sentence-transformers==2.7.0
+chromadb==0.4.24
+spacy==3.7.4
+anthropic==0.25.0
+streamlit==1.33.0
+pandas==2.2.2
+python-dotenv==1.0.1
+numpy==1.26.4
+
+# spaCy model — must be a pip URL, not a bare name, for Streamlit Cloud compatibility.
+# Match version to spacy==3.7.4 above.
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.4/en_core_web_sm-3.7.4-py3-none-any.whl
