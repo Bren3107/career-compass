@@ -20,21 +20,21 @@ Locked interface (do not change signature without team agreement):
     score is cosine SIMILARITY (0–1), not distance.
 """
 
-import streamlit as st
 import chromadb
 
 CHROMA_PATH = "data/chroma_db"
 COLLECTION_NAME = "jobs"
 
+_COLLECTION = None
 
-@st.cache_resource
+
 def _load_collection():
-    """
-    Load the ChromaDB persistent client and the jobs collection.
-    @st.cache_resource = one shared instance across all sessions.
-    """
-    client = chromadb.PersistentClient(path=CHROMA_PATH)
-    return client.get_collection(COLLECTION_NAME)
+    """Load the ChromaDB collection. Cached as a module-level singleton."""
+    global _COLLECTION
+    if _COLLECTION is None:
+        client = chromadb.PersistentClient(path=CHROMA_PATH)
+        _COLLECTION = client.get_collection(COLLECTION_NAME)
+    return _COLLECTION
 
 
 def _score_label(score: float) -> str:

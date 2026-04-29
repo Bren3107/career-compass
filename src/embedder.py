@@ -2,7 +2,7 @@
 embedder.py — Text embedding using sentence-transformers.
 
 Model: all-MiniLM-L6-v2 (384-dim, fast on CPU, MTEB ~56)
-Cached with @st.cache_resource — model loads once, shared across all sessions.
+Cached as a module-level singleton — model loads once, shared across all processes.
 
 Locked interface (do not change signature without team agreement):
     embed(text: str) -> list[float]
@@ -10,20 +10,19 @@ Locked interface (do not change signature without team agreement):
     ChromaDB requires list, not numpy — always call .tolist().
 """
 
-import streamlit as st
 from sentence_transformers import SentenceTransformer
 
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
+_MODEL = None
 
-@st.cache_resource
+
 def _load_model() -> SentenceTransformer:
-    """
-    Load the sentence-transformers model.
-    @st.cache_resource = one shared instance across all Streamlit sessions.
-    DO NOT use @st.cache_data — it will try to pickle the model and fail.
-    """
-    return SentenceTransformer(MODEL_NAME)
+    """Load the sentence-transformers model. Cached as a module-level singleton."""
+    global _MODEL
+    if _MODEL is None:
+        _MODEL = SentenceTransformer(MODEL_NAME)
+    return _MODEL
 
 
 def embed(text: str) -> list[float]:

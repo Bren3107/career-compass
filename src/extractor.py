@@ -10,7 +10,6 @@ Locked interface (do not change signature without team agreement):
     Returns canonical skill names, deduplicated, lowercased.
 """
 
-import streamlit as st
 import pandas as pd
 import spacy
 from spacy.matcher import PhraseMatcher
@@ -96,13 +95,16 @@ TECH_SUPPLEMENT: dict[str, list[str]] = {
 }
 
 
-@st.cache_resource
+_MATCHER_CACHE = None
+
 def _load_matcher():
     """
     Load spaCy model and build PhraseMatcher from skills taxonomy.
-    Cached with @st.cache_resource — one instance shared across all sessions.
-    Do NOT use @st.cache_data here (will fail with pickle error on model objects).
+    Cached as a module-level singleton — one instance shared across all processes.
     """
+    global _MATCHER_CACHE
+    if _MATCHER_CACHE is not None:
+        return _MATCHER_CACHE
     nlp = spacy.load("en_core_web_sm")
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 
@@ -134,7 +136,8 @@ def _load_matcher():
     patterns = [nlp.make_doc(term) for term in all_terms]
     matcher.add("SKILLS", patterns)
 
-    return nlp, matcher, term_to_canonical
+    globals()['_MATCHER_CACHE'] = (nlp, matcher, term_to_canonical)
+    return globals()['_MATCHER_CACHE']
 
 
 def extract_skills(text: str) -> list[str]:

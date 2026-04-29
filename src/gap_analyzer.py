@@ -8,8 +8,8 @@ Key rules applied here:
 - Prompt explicitly requests JSON output — prevents free-form markdown responses.
 - Response is defensively parsed: markdown code fences stripped before json.loads().
 - json.loads() is wrapped in try/except with a graceful fallback.
-- Result is cached in st.session_state to avoid repeat API calls on page re-runs.
-- API key retrieved via get_secret() (works for both local .env and Streamlit Cloud).
+- Result is cached in a module-level dict to avoid repeat API calls.
+- API key retrieved via get_secret().
 
 Locked interface (do not change signature without team agreement):
     analyze_gaps(job: dict, student_skills: list[str]) -> dict
@@ -20,6 +20,8 @@ import json
 import re
 import anthropic
 from src.config import get_secret
+
+_GAP_CACHE: dict[str, dict] = {}
 
 MODEL = "claude-haiku-4-5-20251001"
 
@@ -75,30 +77,17 @@ def analyze_gaps(job: dict, student_skills: list[str]) -> dict:
     """
     Call Claude Haiku to identify skill gaps and generate a 30-day learning plan.
 
-    Caches the result in st.session_state["gap_analysis"] so repeated page
-    visits don't trigger another API call.
-
     Args:
         job: Job dict from matcher.match_jobs() output.
              Must have keys: title, skills_required, raw_description.
         student_skills: List of canonical skill names from extractor.extract_skills().
 
     Returns:
-        Dict with keys:
-            {
-                "missing_skills": list[str],
-                "week1": str,
-                "week2": str,
-                "week3": str,
-                "week4": str,
-            }
+        Dict with keys: {missing_skills, week1, week2, week3, week4}
     """
-    import streamlit as st
-
-    # Return cached result if this job was already analysed this session
     cache_key = f"gap_analysis_{job.get('title', '')}"
-    if cache_key in st.session_state:
-        return st.session_state[cache_key]
+    if cache_key in _GAP_CACHE:
+        return _GAP_CACHE[cache_key]
 
     api_key = get_secret("ANTHROPIC_API_KEY")
     client = anthropic.Anthropic(api_key=api_key)
@@ -121,5 +110,5 @@ def analyze_gaps(job: dict, student_skills: list[str]) -> dict:
     raw_text = message.content[0].text
     result = _parse_response(raw_text)
 
-    st.session_state[cache_key] = result
+    _GAP_CACHE[cache_key] = result
     return result
