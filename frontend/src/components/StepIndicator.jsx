@@ -4,7 +4,7 @@ export function StepIndicator({ currentStep }) {
       {[1, 2, 3].map((step) => (
         <div
           key={step}
-          className={`step-dot ${step === currentStep ? 'active' : ''}`}
+          className={`step-dot ${step === currentStep ? 'active' : ''} ${step < currentStep ? 'active' : ''}`}
         />
       ))}
     </div>

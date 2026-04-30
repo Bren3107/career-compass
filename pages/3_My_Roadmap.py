@@ -13,8 +13,11 @@ Key rules applied:
 
 import streamlit as st
 from src.gap_analyzer import analyze_gaps
+from src.styles import inject_css
 
-st.set_page_config(page_title="My Roadmap — Career Compass", page_icon="🧭", layout="centered")
+st.set_page_config(page_title="My Roadmap — Career Compass", page_icon="🧭", layout="wide")
+
+inject_css()
 
 # ── Session State Guard ───────────────────────────────────────────────────────
 if "top_matches" not in st.session_state or not st.session_state["top_matches"]:
@@ -22,15 +25,32 @@ if "top_matches" not in st.session_state or not st.session_state["top_matches"]:
     st.switch_page("pages/2_Job_Matches.py")
     st.stop()
 
-st.title("🧭 Career Compass")
-st.header("Step 3: Your Personalised Roadmap")
+# Step indicator
+step_indicator = """
+<div class="step-indicator">
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot active"></div>
+</div>
+"""
+st.markdown(step_indicator, unsafe_allow_html=True)
+
+# Page title
+title_html = """
+<div class="animated">
+    <h1 class="page-title">Your Personalised Roadmap</h1>
+    <p class="page-subtitle">A 30-day plan to close skill gaps and land your next role</p>
+</div>
+"""
+st.markdown(title_html, unsafe_allow_html=True)
 
 top_job = st.session_state["top_matches"][0]
 student_skills = st.session_state.get("extracted_skills", [])
 
 st.markdown(
-    f"Analysing your skill gaps for **{top_job['title']}** "
-    f"({top_job['label']} — {int(top_job['score'] * 100)}% match)"
+    f"<p style='text-align: center; color: var(--muted);'>Analysing skill gaps for <strong>{top_job['title']}</strong> "
+    f"({top_job['label']} — {int(top_job['score'] * 100)}% match)</p>",
+    unsafe_allow_html=True
 )
 
 # ── Gap Analysis ──────────────────────────────────────────────────────────────
@@ -53,9 +73,7 @@ else:
     missing = result.get("missing_skills", [])
     if missing:
         tag_html = " ".join(
-            f'<span style="background:transparent;border:1.5px solid white;color:white;border-radius:12px;padding:5px 12px;'
-            f'margin:3px;display:inline-block;font-size:0.95em;font-weight:500;">'
-            f'{skill}</span>'
+            f'<span class="skill-badge">{skill}</span>'
             for skill in missing
         )
         st.markdown(tag_html, unsafe_allow_html=True)

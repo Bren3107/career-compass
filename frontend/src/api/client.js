@@ -5,17 +5,24 @@
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
-async function request(endpoint, method = 'GET', body = null) {
+async function request(endpoint, method = 'GET', body = null, isFormData = false) {
   const url = `${API_BASE}${endpoint}`
   const options = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
   }
 
-  if (body) {
-    options.body = JSON.stringify(body)
+  if (!isFormData) {
+    options.headers = {
+      'Content-Type': 'application/json',
+    }
+    if (body) {
+      options.body = JSON.stringify(body)
+    }
+  } else {
+    // For FormData, let the browser set Content-Type with boundary
+    if (body) {
+      options.body = body
+    }
   }
 
   const response = await fetch(url, options)
@@ -34,6 +41,13 @@ export const api = {
 
   // POST /api/extract-skills
   extractSkills: (text) => request('/api/extract-skills', 'POST', { text }),
+
+  // POST /api/extract-from-pdf
+  extractFromPdf: (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request('/api/extract-from-pdf', 'POST', formData, true)
+  },
 
   // POST /api/match-jobs
   matchJobs: (skills) => request('/api/match-jobs', 'POST', { skills }),

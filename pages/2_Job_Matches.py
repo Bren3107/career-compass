@@ -13,8 +13,11 @@ Key rules applied:
 import streamlit as st
 from src.embedder import embed
 from src.matcher import match_jobs
+from src.styles import inject_css
 
-st.set_page_config(page_title="Job Matches — Career Compass", page_icon="🧭", layout="centered")
+st.set_page_config(page_title="Job Matches — Career Compass", page_icon="🧭", layout="wide")
+
+inject_css()
 
 # ── Session State Guard ───────────────────────────────────────────────────────
 # If the user navigates here directly or refreshes, session state is empty.
@@ -24,11 +27,27 @@ if "extracted_skills" not in st.session_state or not st.session_state["extracted
     st.switch_page("pages/1_Brain_Dump.py")
     st.stop()
 
-st.title("🧭 Career Compass")
-st.header("Step 2: Your Top Job Matches")
+# Step indicator
+step_indicator = """
+<div class="step-indicator">
+    <div class="step-dot"></div>
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+</div>
+"""
+st.markdown(step_indicator, unsafe_allow_html=True)
+
+# Page title
+title_html = """
+<div class="animated">
+    <h1 class="page-title">Your Top Job Matches</h1>
+    <p class="page-subtitle">Roles that align with your skills and experience</p>
+</div>
+"""
+st.markdown(title_html, unsafe_allow_html=True)
 
 skills = st.session_state["extracted_skills"]
-st.markdown(f"Matching your **{len(skills)} detected skills** against the Sydney job market...")
+st.markdown(f"<p style='text-align: center; color: var(--muted);'>Matching your <strong>{len(skills)} detected skills</strong> against the Sydney job market...</p>", unsafe_allow_html=True)
 
 # ── Job Matching ──────────────────────────────────────────────────────────────
 # Run matching when button is clicked, or if we already have results cached.
@@ -54,44 +73,52 @@ else:
     for i, job in enumerate(matches, start=1):
         score_pct = int(job["score"] * 100)
         label = job["label"]
-        colour = LABEL_COLOURS.get(label, "#6c757d")
 
-        with st.container(border=True):
-            col_title, col_badge = st.columns([4, 1])
-            with col_title:
-                st.subheader(f"#{i} — {job['title']}")
-            with col_badge:
-                st.markdown(
-                    f'<div style="text-align:right;margin-top:8px;">'
-                    f'<span style="background:{colour};color:white;border-radius:12px;'
-                    f'padding:4px 10px;font-size:0.85em;font-weight:bold;">{label}</span>'
-                    f'</div>',
-                    unsafe_allow_html=True,
+        # Determine badge class
+        if score_pct >= 60:
+            badge_class = "match-badge strong"
+        elif score_pct >= 40:
+            badge_class = "match-badge moderate"
+        else:
+            badge_class = "match-badge weak"
+
+        # Custom card with hover effect
+        card_html = f"""
+        <div class="compass-card animated delay-{min(i, 5)}">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                <div style="flex: 1;">
+                    <h3 style="margin: 0 0 4px 0; font-family: 'Outfit', sans-serif; color: var(--text); font-size: 1.2em;">#{i} — {job['title']}</h3>
+                </div>
+                <span class="{badge_class}" style="white-space: nowrap; margin-left: 12px;">{label}</span>
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
+
+        st.progress(job["score"], text=f"{score_pct}% similarity")
+
+        meta_parts = []
+        if job.get("seniority"):
+            meta_parts.append(job["seniority"])
+        if job.get("company_type"):
+            meta_parts.append(job["company_type"])
+        if job.get("location"):
+            meta_parts.append(job["location"])
+        if meta_parts:
+            st.caption(" · ".join(meta_parts))
+
+        with st.expander("Required skills"):
+            skills_required = job.get("skills_required", "")
+            if skills_required:
+                tag_html = " ".join(
+                    f'<span class="skill-badge">{s.strip()}</span>'
+                    for s in skills_required.split(",") if s.strip()
                 )
+                st.markdown(tag_html, unsafe_allow_html=True)
+            else:
+                st.write("Not specified.")
 
-            st.progress(job["score"], text=f"{score_pct}% similarity")
-
-            meta_parts = []
-            if job.get("seniority"):
-                meta_parts.append(job["seniority"])
-            if job.get("company_type"):
-                meta_parts.append(job["company_type"])
-            if job.get("location"):
-                meta_parts.append(job["location"])
-            if meta_parts:
-                st.caption(" · ".join(meta_parts))
-
-            with st.expander("Required skills"):
-                skills_required = job.get("skills_required", "")
-                if skills_required:
-                    tag_html = " ".join(
-                        f'<span style="background:transparent;border:1.5px solid white;color:white;border-radius:12px;padding:3px 8px;'
-                        f'margin:2px;display:inline-block;font-size:0.85em;">{s.strip()}</span>'
-                        for s in skills_required.split(",") if s.strip()
-                    )
-                    st.markdown(tag_html, unsafe_allow_html=True)
-                else:
-                    st.write("Not specified.")
+        st.markdown("", unsafe_allow_html=True)
 
     st.divider()
 

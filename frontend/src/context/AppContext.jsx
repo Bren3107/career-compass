@@ -7,12 +7,14 @@ export function AppProvider({ children }) {
   const [matches, setMatches] = useState([])
   const [analysis, setAnalysis] = useState(null)
   const [brainDump, setBrainDump] = useState('')
+  const [pdfText, setPdfText] = useState('')
 
   const reset = useCallback(() => {
     setSkills([])
     setMatches([])
     setAnalysis(null)
     setBrainDump('')
+    setPdfText('')
   }, [])
 
   const value = useMemo(() => ({
@@ -24,8 +26,10 @@ export function AppProvider({ children }) {
     setAnalysis,
     brainDump,
     setBrainDump,
+    pdfText,
+    setPdfText,
     reset,
-  }), [skills, matches, analysis, brainDump, reset])
+  }), [skills, matches, analysis, brainDump, pdfText, reset])
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

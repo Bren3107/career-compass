@@ -23,100 +23,137 @@ export function Landing() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
+        staggerChildren: 0.12,
+        delayChildren: 0.2,
       },
     },
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 24 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
+      transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
     },
   }
 
+  const steps = [
+    {
+      num: '01',
+      title: 'Brain Dump',
+      desc: 'Share everything — projects, experience, skills, interests. No need to be formal.',
+    },
+    {
+      num: '02',
+      title: 'Find Matches',
+      desc: 'AI extracts your skills and finds the Sydney jobs that align with your profile.',
+    },
+    {
+      num: '03',
+      title: 'Your Roadmap',
+      desc: 'Get a personalized 30-day plan to close skill gaps and land your next role.',
+    },
+  ]
+
   return (
-    <div className="bg-black">
+    <div className="bg-transparent">
       {/* ── Scrollytelling Hero Section ── */}
       <CompassHero onCTAClick={() => navigate('/brain-dump')} />
 
       {/* ── Below-the-fold Content Section ── */}
-      <div className="relative bg-gradient-to-b from-black via-[#080C14] to-[#080C14]">
-        {/* Gradient transition strip */}
-        <div className="h-32 bg-gradient-to-b from-black to-transparent" />
+      <div className="relative">
+        {/* Gradient transition from hero black to page background */}
+        <div
+          className="h-40"
+          style={{
+            background: 'linear-gradient(to bottom, #000000 0%, var(--bg) 100%)',
+          }}
+        />
 
-        <motion.div
-          className="content-container text-center animated"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-        >
-          <h2 className="text-3xl md:text-4xl font-inter font-bold text-white tracking-tight mb-4">
-            How It Works
-          </h2>
-          <p className="text-white/50 font-inter text-lg mb-12 max-w-2xl mx-auto">
-            Three simple steps to transform your experience into a job-ready roadmap
-          </p>
+        {/* Section gradient glow */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(94,106,210,0.06) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+
+        <div className="max-w-4xl mx-auto px-6 pb-24">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <p
+              className="text-sm font-medium tracking-widest uppercase mb-4"
+              style={{ color: 'var(--accent)' }}
+            >
+              How it works
+            </p>
+            <h2
+              className="text-3xl md:text-4xl font-semibold text-white tracking-tight mb-4"
+              style={{ letterSpacing: '-0.03em' }}
+            >
+              Three steps to your career path
+            </h2>
+            <p className="text-base max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              Transform your experience into a personalized, actionable roadmap
+            </p>
+          </motion.div>
 
           {/* Step Cards */}
           <motion.div
-            className="grid-2"
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-50px' }}
           >
-            <motion.div className="step-card" variants={itemVariants}>
-              <div className="text-3xl mb-3">🧠</div>
-              <h3>Brain Dump</h3>
-              <p>Share everything: your projects, experience, skills, interests. No need to be formal.</p>
-            </motion.div>
-
-            <motion.div className="step-card" variants={itemVariants}>
-              <div className="text-3xl mb-3">🎯</div>
-              <h3>Find Matches</h3>
-              <p>AI extracts your skills and finds the Sydney jobs that align with your profile.</p>
-            </motion.div>
-
-            <motion.div className="step-card" variants={itemVariants}>
-              <div className="text-3xl mb-3">🗺️</div>
-              <h3>Your Roadmap</h3>
-              <p>Get a personalized 30-day plan to close skill gaps and land your next role.</p>
-            </motion.div>
+            {steps.map((step) => (
+              <motion.div
+                key={step.num}
+                className="step-card group"
+                variants={itemVariants}
+              >
+                <span
+                  className="inline-block text-xs font-semibold tracking-wider mb-4"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  {step.num}
+                </span>
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+              </motion.div>
+            ))}
           </motion.div>
 
+          {/* CTA */}
           <motion.div
-            className="mt-12"
-            initial={{ opacity: 0, y: 20 }}
+            className="mt-16 text-center"
+            initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
             <button
               className="primary"
               onClick={() => navigate('/brain-dump')}
-              style={{ fontSize: '1.1rem', padding: '14px 32px' }}
+              style={{ fontSize: '0.9rem', padding: '12px 28px' }}
             >
               Get Started →
             </button>
           </motion.div>
 
           {jobCount > 0 && (
-            <p
-              style={{
-                marginTop: '32px',
-                color: 'var(--muted)',
-                fontSize: '0.9rem',
-              }}
-            >
+            <p className="text-center mt-8 text-sm" style={{ color: 'var(--muted)' }}>
               Matching against {jobCount} Sydney job descriptions
             </p>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

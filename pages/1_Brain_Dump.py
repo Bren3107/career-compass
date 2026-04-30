@@ -12,15 +12,30 @@ Key rules applied:
 
 import streamlit as st
 from src.extractor import extract_skills
+from src.styles import inject_css
 
-st.set_page_config(page_title="Brain Dump — Career Compass", page_icon="🧭", layout="centered")
+st.set_page_config(page_title="Brain Dump — Career Compass", page_icon="🧭", layout="wide")
 
-st.title("🧭 Career Compass")
-st.header("Step 1: Tell us about yourself")
-st.markdown(
-    "Paste anything — uni projects, work experience, internships, side projects, skills you've picked up. "
-    "Don't worry about formatting. The more detail the better."
-)
+inject_css()
+
+# Step indicator
+step_indicator = """
+<div class="step-indicator">
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+</div>
+"""
+st.markdown(step_indicator, unsafe_allow_html=True)
+
+# Page title
+title_html = """
+<div class="animated">
+    <h1 class="page-title">Tell us about yourself</h1>
+    <p class="page-subtitle">Paste anything — projects, experience, internships, side work. The more detail, the better.</p>
+</div>
+"""
+st.markdown(title_html, unsafe_allow_html=True)
 
 SAMPLE_BRAIN_DUMP = (
     "I studied Information Systems at UTS and did a data analysis project where I used SQL to query "
@@ -86,14 +101,15 @@ if st.session_state.get("extracted_skills") is not None:
             "(e.g. 'Python', 'SQL', 'Power BI', 'dbt', 'Azure')."
         )
     else:
-        # Display skills as coloured tags
+        # Display skills as styled badges
         tag_html = " ".join(
-            f'<span style="background:transparent;border:1.5px solid white;color:white;border-radius:12px;padding:4px 10px;'
-            f'margin:3px;display:inline-block;font-size:0.9em;">{s}</span>'
+            f'<span class="skill-badge">{s}</span>'
             for s in sorted(skills)
         )
         st.markdown(tag_html, unsafe_allow_html=True)
 
         st.markdown("")
-        if st.button("Find My Job Matches →", type="primary"):
-            st.switch_page("pages/2_Job_Matches.py")
+        col1, col2, col3 = st.columns([1, 1.5, 1])
+        with col2:
+            if st.button("Find My Job Matches →", type="primary", use_container_width=True):
+                st.switch_page("pages/2_Job_Matches.py")

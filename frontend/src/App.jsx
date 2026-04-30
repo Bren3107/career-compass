@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { AppProvider } from './context/AppContext'
+import { LinearBackground } from './components/LinearBackground'
 import { Landing } from './pages/Landing'
 import { BrainDump } from './pages/BrainDump'
 import { JobMatches } from './pages/JobMatches'
@@ -25,8 +26,10 @@ export default function App() {
   return (
     <AppProvider>
       <BrowserRouter>
+        <LinearBackground />
         <AnimatedRoutes />
       </BrowserRouter>
     </AppProvider>
   )
 }
+

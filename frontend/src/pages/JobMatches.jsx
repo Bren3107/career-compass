@@ -51,21 +51,27 @@ export function JobMatches() {
         <StepIndicator currentStep={2} />
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
+          <p
+            className="text-sm font-medium tracking-widest uppercase mb-3 text-center"
+            style={{ color: 'var(--accent)' }}
+          >
+            Step 02
+          </p>
           <h1 className="page-title">Your Top Job Matches</h1>
           <p className="page-subtitle">Roles that align with your skills and experience</p>
-          <p style={{ textAlign: 'center', color: 'var(--muted)' }}>
-            Matching your <strong>{skills.length} detected skills</strong> against the Sydney job market...
+          <p className="text-center text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+            Matching your <strong className="text-white">{skills.length} detected skills</strong> against the Sydney job market
           </p>
         </motion.div>
 
         {!showMatches && (
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <div className="text-center mt-10">
             <button className="primary" onClick={handleFindMatches} disabled={loading}>
-              {loading ? '⏳ Finding Matches...' : 'Find My Matches'}
+              {loading ? 'Finding Matches...' : 'Find My Matches'}
             </button>
           </div>
         )}
@@ -76,7 +82,7 @@ export function JobMatches() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, staggerChildren: 0.1, delayChildren: 0.2 }}
+            transition={{ duration: 0.5 }}
           >
             {matches.map((job, idx) => {
               const scorePct = Math.round(job.score * 100)
@@ -86,47 +92,52 @@ export function JobMatches() {
                 <motion.div
                   key={idx}
                   className="compass-card"
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                    <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem' }}>
-                      #{idx + 1} — {job.title}
-                    </h3>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <span className="text-xs font-medium mr-2" style={{ color: 'var(--muted)' }}>
+                        #{idx + 1}
+                      </span>
+                      <h3 className="inline text-base font-semibold text-white" style={{ letterSpacing: '-0.02em' }}>
+                        {job.title}
+                      </h3>
+                    </div>
                     <span className={`match-badge ${badgeClass}`}>{job.label}</span>
                   </div>
 
                   <div className="progress-bar">
                     <div className="progress-fill" style={{ width: `${scorePct}%` }} />
                   </div>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '12px' }}>
+                  <p className="text-xs mb-3" style={{ color: 'var(--muted)' }}>
                     {scorePct}% similarity
                   </p>
 
-                  {job.seniority || job.company_type || job.location ? (
-                    <p
-                      style={{
-                        fontSize: '0.85rem',
-                        color: 'var(--muted)',
-                        marginBottom: '16px',
-                      }}
-                    >
+                  {(job.seniority || job.company_type || job.location) && (
+                    <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
                       {[job.seniority, job.company_type, job.location].filter(Boolean).join(' · ')}
                     </p>
-                  ) : null}
+                  )}
 
-                  <details style={{ marginTop: '12px' }}>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--accent)' }}>
+                  <details className="mt-3">
+                    <summary
+                      className="cursor-pointer font-medium text-sm"
+                      style={{ color: 'var(--accent)' }}
+                    >
                       Required skills
                     </summary>
-                    <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
+                    <div
+                      className="mt-3 pt-3"
+                      style={{ borderTop: '1px solid var(--border)' }}
+                    >
                       {job.skills_required ? (
                         job.skills_required.split(',').map((skill, i) => (
                           <SkillBadge key={i} skill={skill.trim()} />
                         ))
                       ) : (
-                        <p>Not specified.</p>
+                        <p className="text-sm" style={{ color: 'var(--muted)' }}>Not specified.</p>
                       )}
                     </div>
                   </details>
@@ -136,11 +147,11 @@ export function JobMatches() {
 
             <hr className="divider" />
 
-            <div className="flex-row" style={{ gap: '12px', justifyContent: 'center' }}>
-              <button className="secondary" onClick={() => navigate('/brain-dump')} style={{ flex: 1, maxWidth: '200px' }}>
+            <div className="flex justify-center gap-3">
+              <button className="secondary" onClick={() => navigate('/brain-dump')}>
                 ← Back
               </button>
-              <button className="primary" onClick={() => navigate('/roadmap')} style={{ flex: 1, maxWidth: '200px' }}>
+              <button className="primary" onClick={() => navigate('/roadmap')}>
                 Generate My Roadmap →
               </button>
             </div>

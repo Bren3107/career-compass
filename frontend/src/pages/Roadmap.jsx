@@ -82,21 +82,31 @@ ${analysis.week4}
         <StepIndicator currentStep={3} />
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
+          <p
+            className="text-sm font-medium tracking-widest uppercase mb-3 text-center"
+            style={{ color: 'var(--accent)' }}
+          >
+            Step 03
+          </p>
           <h1 className="page-title">Your Personalised Roadmap</h1>
           <p className="page-subtitle">A 30-day plan to close skill gaps and land your next role</p>
-          <p style={{ textAlign: 'center', color: 'var(--muted)' }}>
-            Analysing skill gaps for <strong>{topJob.title}</strong> ({topJob.label} — {Math.round(topJob.score * 100)}% match)
+          <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Analysing skill gaps for{' '}
+            <strong className="text-white">{topJob.title}</strong>{' '}
+            <span style={{ color: 'var(--muted)' }}>
+              ({topJob.label} — {Math.round(topJob.score * 100)}% match)
+            </span>
           </p>
         </motion.div>
 
         {!showRoadmap && (
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <div className="text-center mt-10">
             <button className="primary" onClick={handleGenerateRoadmap} disabled={loading}>
-              {loading ? '⏳ Generating Roadmap...' : 'Generate My Roadmap'}
+              {loading ? 'Generating Roadmap...' : 'Generate My Roadmap'}
             </button>
           </div>
         )}
@@ -107,23 +117,29 @@ ${analysis.week4}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
           >
             <hr className="divider" />
-            <h2 style={{ fontSize: '1.3rem', marginBottom: '16px' }}>Skills to develop</h2>
+            <h2 className="text-base font-semibold mb-4" style={{ letterSpacing: '-0.02em' }}>
+              Skills to develop
+            </h2>
 
             {analysis.missing_skills && analysis.missing_skills.length > 0 ? (
-              <div style={{ marginBottom: '32px' }}>
+              <div className="mb-8">
                 {analysis.missing_skills.map((skill) => (
                   <SkillBadge key={skill} skill={skill} />
                 ))}
               </div>
             ) : (
-              <div className="alert info">No specific skill gaps identified — you may already be a strong match!</div>
+              <div className="alert info">
+                No specific skill gaps identified — you may already be a strong match!
+              </div>
             )}
 
             <hr className="divider" />
-            <h2 style={{ fontSize: '1.3rem', marginBottom: '24px' }}>Your 30-Day Learning Plan</h2>
+            <h2 className="text-base font-semibold mb-6" style={{ letterSpacing: '-0.02em' }}>
+              Your 30-Day Learning Plan
+            </h2>
 
             {['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((week, idx) => {
               const contentKey = `week${idx + 1}`
@@ -132,8 +148,28 @@ ${analysis.week4}
               return (
                 <details key={week} className="expander" open>
                   <summary className="expander-header">
-                    {week}
-                    <span>▼</span>
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full inline-block"
+                        style={{ backgroundColor: 'var(--accent)' }}
+                      />
+                      {week}
+                    </span>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      className="text-white/30"
+                    >
+                      <path
+                        d="M3 4.5L6 7.5L9 4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </summary>
                   <div className="expander-content">
                     <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.8' }}>{content}</p>
@@ -144,25 +180,24 @@ ${analysis.week4}
 
             <hr className="divider" />
 
-            <div className="flex-row" style={{ gap: '12px', justifyContent: 'center' }}>
-              <button className="secondary" onClick={() => navigate('/matches')} style={{ flex: 1, maxWidth: '200px' }}>
+            <div className="flex justify-center gap-3">
+              <button className="secondary" onClick={() => navigate('/matches')}>
                 ← Back to Matches
               </button>
-              <button className="primary" onClick={handleDownload} style={{ flex: 1, maxWidth: '200px' }}>
-                📥 Download Plan
+              <button className="primary" onClick={handleDownload}>
+                Download Plan
               </button>
             </div>
 
             <hr className="divider" />
 
-            <div style={{ textAlign: 'center' }}>
+            <div className="text-center">
               <button
                 className="secondary"
                 onClick={() => {
                   reset()
                   navigate('/')
                 }}
-                style={{ width: '100%', maxWidth: '200px' }}
               >
                 Start Over
               </button>

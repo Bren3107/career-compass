@@ -14,9 +14,11 @@ Deploy with: uvicorn main:app --host 0.0.0.0 --port $PORT
 import os
 import chromadb
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import pdfplumber
+import io
 
 from src.config import get_secret
 from src.extractor import extract_skills
@@ -101,6 +103,11 @@ class AnalyzeGapsResponse(BaseModel):
     week4: str
 
 
+class ExtractFromPdfResponse(BaseModel):
+    text: str
+    skills: list[str]
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
@@ -157,6 +164,40 @@ async def api_analyze_gaps(req: AnalyzeGapsRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gap analysis failed: {e}")
+
+
+@app.post("/api/extract-from-pdf", response_model=ExtractFromPdfResponse)
+async def api_extract_from_pdf(file: UploadFile = File(...)):
+    """Extract text from a PDF resume and extract skills from it."""
+    try:
+        if not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="File must be a PDF")
+
+        # Read the uploaded file into memory
+        contents = await file.read()
+        pdf_file = io.BytesIO(contents)
+
+        # Extract text from PDF
+        extracted_text = ""
+        try:
+            with pdfplumber.open(pdf_file) as pdf:
+                for page in pdf.pages:
+                    extracted_text += page.extract_text() or ""
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to read PDF: {str(e)}")
+
+        if not extracted_text.strip():
+            raise HTTPException(status_code=400, detail="No text found in PDF")
+
+        # Extract skills from the extracted text
+        skills = extract_skills(extracted_text)
+
+        return ExtractFromPdfResponse(text=extracted_text, skills=skills)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF extraction failed: {e}")
 
 
 if __name__ == "__main__":
