@@ -145,6 +145,7 @@ export function JobMatches() {
                           fill="none"
                           stroke="var(--accent)"
                           strokeWidth="2"
+                          aria-hidden="true"
                         >
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
