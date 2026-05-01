@@ -8,10 +8,11 @@ import { SkillBadge } from '../components/SkillBadge'
 
 export function JobMatches() {
   const navigate = useNavigate()
-  const { skills, matches, setMatches } = useApp()
+  const { skills, matches, setMatches, setSelectedJob, setSelectedJobIndex } = useApp()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showMatches, setShowMatches] = useState(matches.length > 0)
+  const [selectedIndex, setSelectedIndex] = useState(null)
 
   // Guard: redirect to BrainDump if no skills
   useEffect(() => {
@@ -40,6 +41,14 @@ export function JobMatches() {
     return 'weak'
   }
 
+  const handleSelectJob = (job, index) => {
+    setSelectedIndex(index)
+    setSelectedJob(job)
+    setSelectedJobIndex(index)
+  }
+
+  const hasStrongMatches = matches.length > 0 && matches.some(job => job.score >= 0.60)
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -66,6 +75,11 @@ export function JobMatches() {
           <p className="text-center text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
             Matching your <strong className="text-white">{skills.length} detected skills</strong> against the Sydney job market
           </p>
+          {!hasStrongMatches && matches.length > 0 && (
+            <div className="alert info" style={{ marginBottom: '24px' }}>
+              No strong matches found. Showing all available roles — you may need to upskill in specific areas.
+            </div>
+          )}
         </motion.div>
 
         {!showMatches && (
@@ -95,6 +109,22 @@ export function JobMatches() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
+                  onClick={() => handleSelectJob(job, idx)}
+                  style={{
+                    cursor: 'pointer',
+                    border: selectedIndex === idx ? '2px solid var(--accent)' : '1px solid var(--border)',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedIndex !== idx) {
+                      e.currentTarget.style.border = '2px solid var(--accent-dim)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedIndex !== idx) {
+                      e.currentTarget.style.border = '1px solid var(--border)'
+                    }
+                  }}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
@@ -105,7 +135,21 @@ export function JobMatches() {
                         {job.title}
                       </h3>
                     </div>
-                    <span className={`match-badge ${badgeClass}`}>{job.label}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`match-badge ${badgeClass}`}>{job.label}</span>
+                      {selectedIndex === idx && (
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="var(--accent)"
+                          strokeWidth="2"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
                   </div>
 
                   <div className="progress-bar">
@@ -151,9 +195,11 @@ export function JobMatches() {
               <button className="secondary" onClick={() => navigate('/brain-dump')}>
                 ← Back
               </button>
-              <button className="primary" onClick={() => navigate('/roadmap')}>
-                Generate My Roadmap →
-              </button>
+              {selectedIndex !== null && (
+                <button className="primary" onClick={() => navigate('/roadmap')}>
+                  Generate Roadmap for {matches[selectedIndex].title} →
+                </button>
+              )}
             </div>
           </motion.div>
         )}
