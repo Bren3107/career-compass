@@ -8,25 +8,23 @@ import { SkillBadge } from '../components/SkillBadge'
 
 export function Roadmap() {
   const navigate = useNavigate()
-  const { skills, matches, analysis, setAnalysis, reset } = useApp()
+  const { skills, analysis, setAnalysis, reset, selectedJob } = useApp()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showRoadmap, setShowRoadmap] = useState(!!analysis)
 
-  const topJob = matches && matches[0]
-
-  // Guard: redirect if no matches
+  // Guard: redirect if no selectedJob
   useEffect(() => {
-    if (!matches || matches.length === 0) {
+    if (!selectedJob) {
       navigate('/matches')
     }
-  }, [matches, navigate])
+  }, [selectedJob, navigate])
 
   const handleGenerateRoadmap = async () => {
     setLoading(true)
     setError('')
     try {
-      const result = await api.analyzeGaps(topJob, skills)
+      const result = await api.analyzeGaps(selectedJob, skills)
       setAnalysis(result)
       setShowRoadmap(true)
     } catch (err) {
@@ -37,12 +35,12 @@ export function Roadmap() {
   }
 
   const handleDownload = () => {
-    if (!analysis || !topJob) return
+    if (!analysis || !selectedJob) return
 
     const planText = `Career Compass — 30-Day Roadmap
 
-Target Role: ${topJob.title}
-Match Score: ${Math.round(topJob.score * 100)}% (${topJob.label})
+Target Role: ${selectedJob.title}
+Match Score: ${Math.round(selectedJob.score * 100)}% (${selectedJob.label})
 
 Skills to Develop:
 ${analysis.missing_skills.map((s) => `  - ${s}`).join('\n')}
@@ -69,7 +67,7 @@ ${analysis.week4}
     document.body.removeChild(element)
   }
 
-  if (!topJob) return null
+  if (!selectedJob) return null
 
   return (
     <motion.div
@@ -96,9 +94,9 @@ ${analysis.week4}
           <p className="page-subtitle">A 30-day plan to close skill gaps and land your next role</p>
           <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
             Analysing skill gaps for{' '}
-            <strong className="text-white">{topJob.title}</strong>{' '}
+            <strong className="text-white">{selectedJob.title}</strong>{' '}
             <span style={{ color: 'var(--muted)' }}>
-              ({topJob.label} — {Math.round(topJob.score * 100)}% match)
+              ({selectedJob.label} — {Math.round(selectedJob.score * 100)}% match)
             </span>
           </p>
         </motion.div>
