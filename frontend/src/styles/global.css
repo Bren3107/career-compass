@@ -17,6 +17,7 @@
   --border-hover: rgba(255, 255, 255, 0.15);
   --accent:    #5E6AD2;      /* Linear's signature indigo */
   --accent-hover: #7C85E0;
+  --accent-dim: rgba(94, 106, 210, 0.4);
   --text:      #F7F8F8;
   --text-secondary: #b4bcd0;
   --muted:     #8A8F98;
