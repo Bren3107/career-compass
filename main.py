@@ -40,7 +40,7 @@ def validate_startup():
         job_count = collection.count()
         if job_count == 0:
             raise ValueError("ChromaDB collection is empty")
-        print(f"✓ ChromaDB ready with {job_count} jobs")
+        print(f"[OK] ChromaDB ready with {job_count} jobs")
     except Exception as e:
         raise RuntimeError(f"ChromaDB failed: {e}. Run scripts/ingest_jobs.py first.")
 
