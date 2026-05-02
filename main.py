@@ -30,9 +30,9 @@ from src.gap_analyzer import analyze_gaps
 def validate_startup():
     """Check that required dependencies are available before starting."""
     try:
-        get_secret("ANTHROPIC_API_KEY")
+        get_secret("OPENAI_API_KEY")
     except ValueError as e:
-        raise RuntimeError(f"ANTHROPIC_API_KEY not set: {e}")
+        raise RuntimeError(f"OPENAI_API_KEY not set: {e}")
 
     try:
         client = chromadb.PersistentClient(path="data/chroma_db")

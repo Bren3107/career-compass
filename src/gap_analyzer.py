@@ -1,8 +1,8 @@
 """
-gap_analyzer.py — Skill gap analysis and 30-day roadmap via Claude Haiku.
+gap_analyzer.py — Skill gap analysis and 30-day roadmap via OpenAI.
 
 Builds a RAG prompt from the matched job's requirements + student skill list,
-calls the Claude Haiku API, and parses the structured JSON response.
+calls the OpenAI API, and parses the structured JSON response.
 
 Key rules applied here:
 - Prompt explicitly requests JSON output — prevents free-form markdown responses.
@@ -18,12 +18,12 @@ Locked interface (do not change signature without team agreement):
 
 import json
 import re
-import anthropic
+from openai import OpenAI
 from src.config import get_secret
 
 _GAP_CACHE: dict[str, dict] = {}
 
-MODEL = "claude-haiku-4-5-20251001"
+MODEL = "gpt-4o-mini"
 
 _PROMPT_TEMPLATE = """You are a career coach helping a student break into the Sydney tech job market.
 
@@ -89,8 +89,8 @@ def analyze_gaps(job: dict, student_skills: list[str]) -> dict:
     if cache_key in _GAP_CACHE:
         return _GAP_CACHE[cache_key]
 
-    api_key = get_secret("ANTHROPIC_API_KEY")
-    client = anthropic.Anthropic(api_key=api_key)
+    api_key = get_secret("OPENAI_API_KEY")
+    client = OpenAI(api_key=api_key)
 
     student_skills_str = ", ".join(student_skills) if student_skills else "No skills detected"
 
@@ -101,13 +101,13 @@ def analyze_gaps(job: dict, student_skills: list[str]) -> dict:
         job_description=job.get("raw_description", ""),
     )
 
-    message = client.messages.create(
+    response = client.chat.completions.create(
         model=MODEL,
         max_tokens=1024,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw_text = message.content[0].text
+    raw_text = response.choices[0].message.content
     result = _parse_response(raw_text)
 
     _GAP_CACHE[cache_key] = result
