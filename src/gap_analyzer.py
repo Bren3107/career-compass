@@ -112,3 +112,54 @@ def analyze_gaps(job: dict, student_skills: list[str]) -> dict:
 
     _GAP_CACHE[cache_key] = result
     return result
+
+
+_OPTIMIZE_PROMPT_TEMPLATE = """You are a resume coach helping a student optimise their resume for a specific job.
+
+The student currently has these skills:
+{student_skills}
+
+Here is the job description they are targeting:
+{job_description}
+
+Your tasks:
+1. Identify the 3-5 most important skills or technologies mentioned in the job description that the student is missing.
+2. Identify 5-8 keywords or phrases from the job description the student should add to their resume to pass ATS screening.
+
+Respond ONLY with valid JSON in this exact format — no markdown, no explanation outside the JSON:
+{{
+  "missing_skills": ["skill1", "skill2", "skill3"],
+  "keyword_recommendations": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+}}"""
+
+
+def optimize_resume(job_description: str, student_skills: list[str]) -> dict:
+    """
+    Analyse a raw job description against student skills.
+
+    Returns:
+        Dict with keys: {missing_skills, keyword_recommendations}
+    """
+    api_key = get_secret("OPENAI_API_KEY")
+    client = OpenAI(api_key=api_key)
+
+    student_skills_str = ", ".join(student_skills) if student_skills else "No skills detected"
+
+    prompt = _OPTIMIZE_PROMPT_TEMPLATE.format(
+        student_skills=student_skills_str,
+        job_description=job_description,
+    )
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        max_tokens=512,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    raw_text = response.choices[0].message.content
+    result = _parse_response(raw_text)
+
+    # Ensure expected keys exist even on parse failure
+    result.setdefault("missing_skills", [])
+    result.setdefault("keyword_recommendations", [])
+    return result
