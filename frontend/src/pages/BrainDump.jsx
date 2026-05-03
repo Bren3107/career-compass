@@ -13,27 +13,38 @@ export function BrainDump() {
   const navigate = useNavigate()
   const { skills, setSkills, setBrainDump, pdfText, setPdfText } = useApp()
   const [text, setText] = useState('')
+  const [pdfSkills, setPdfSkills] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const fileInputRef = useRef(null)
 
   const handleExtract = async () => {
-    const sourceText = text || pdfText
-    if (!sourceText.trim()) {
+    const hasText = text.trim().length > 0
+    const hasPdf = pdfText.trim().length > 0
+
+    if (!hasText && !hasPdf) {
       setError('Please paste some experience text or upload a resume PDF.')
       return
     }
-    if (sourceText.split(' ').length < 30) {
-      setError(`Your text is only ${sourceText.split(' ').length} words. Add more detail for better skill extraction (aim for 50+ words).`)
+
+    const combinedWordCount = (text + ' ' + pdfText).trim().split(/\s+/).length
+    if (combinedWordCount < 30) {
+      setError(`Your content is only ${combinedWordCount} words. Add more detail for better skill extraction (aim for 50+ words).`)
       return
     }
 
     setLoading(true)
     setError('')
     try {
-      const result = await api.extractSkills(sourceText)
-      setSkills(result.skills)
-      setBrainDump(sourceText)
+      let textSkills = []
+      if (hasText) {
+        const result = await api.extractSkills(text)
+        textSkills = result.skills
+      }
+
+      const merged = [...new Set([...textSkills, ...pdfSkills])]
+      setSkills(merged)
+      setBrainDump([text, pdfText].filter(Boolean).join('\n\n'))
     } catch (err) {
       setError(`Extraction failed: ${err.message}`)
     } finally {
@@ -55,24 +66,22 @@ export function BrainDump() {
     try {
       const result = await api.extractFromPdf(file)
       setPdfText(result.text)
-      setSkills(result.skills)
-      setText('') // Clear text input if PDF is used
-      // Scroll to show extracted text
+      setPdfSkills(result.skills)
       setTimeout(() => {
         document.querySelector('[data-pdf-result]')?.scrollIntoView({ behavior: 'smooth' })
       }, 100)
     } catch (err) {
       setError(`PDF upload failed: ${err.message}`)
       setPdfText('')
+      setPdfSkills([])
     } finally {
       setLoading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
-  const currentSource = text || pdfText
-  const hasContent = currentSource.trim().length > 0
-  const wordCount = currentSource.split(' ').length
+  const hasContent = text.trim().length > 0 || pdfText.trim().length > 0
+  const pdfWordCount = pdfText.trim() ? pdfText.trim().split(/\s+/).length : 0
 
   return (
     <motion.div
@@ -97,7 +106,7 @@ export function BrainDump() {
           </p>
           <h1 className="page-title">Tell us about yourself</h1>
           <p className="page-subtitle">
-            Paste your experience or upload your resume (PDF). The more detail, the better.
+            Paste your experience, upload your resume (PDF), or use both. The more detail, the better.
           </p>
         </motion.div>
 
@@ -110,18 +119,14 @@ export function BrainDump() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={SAMPLE_TEXT}
-            disabled={pdfText.length > 0}
             style={{
               minHeight: '180px',
               marginBottom: '12px',
-              opacity: pdfText.length > 0 ? 0.5 : 1,
-              cursor: pdfText.length > 0 ? 'not-allowed' : 'text',
             }}
           />
           <button
             className="secondary"
             onClick={() => setText(SAMPLE_TEXT)}
-            disabled={pdfText.length > 0}
             style={{ marginBottom: '20px' }}
           >
             Use Sample Text
@@ -188,11 +193,12 @@ export function BrainDump() {
               color: 'var(--text-secondary)',
             }}
           >
-            ✓ PDF uploaded successfully. {wordCount} words extracted.
+            ✓ PDF uploaded successfully. {pdfWordCount} words extracted ({pdfSkills.length} skills found).
             <button
               className="secondary"
               onClick={() => {
                 setPdfText('')
+                setPdfSkills([])
                 setSkills([])
               }}
               style={{ marginLeft: '12px', padding: '4px 8px', fontSize: '0.8rem' }}
@@ -239,7 +245,8 @@ export function BrainDump() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-center"
+              className="flex-row"
+              style={{ gap: '12px', justifyContent: 'center' }}
             >
               <button
                 className="primary"
@@ -247,6 +254,13 @@ export function BrainDump() {
                 style={{ padding: '12px 28px' }}
               >
                 Find My Job Matches →
+              </button>
+              <button
+                className="secondary"
+                onClick={() => navigate('/optimize')}
+                style={{ padding: '12px 28px' }}
+              >
+                Resume Optimization
               </button>
             </motion.div>
           </motion.div>
