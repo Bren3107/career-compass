@@ -7,6 +7,7 @@ import { Landing } from './pages/Landing'
 import { BrainDump } from './pages/BrainDump'
 import { JobMatches } from './pages/JobMatches'
 import { Roadmap } from './pages/Roadmap'
+import { Optimize } from './pages/Optimize'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -18,6 +19,7 @@ function AnimatedRoutes() {
         <Route path="/brain-dump" element={<BrainDump />} />
         <Route path="/matches" element={<JobMatches />} />
         <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="/optimize" element={<Optimize />} />
       </Routes>
     </AnimatePresence>
   )
