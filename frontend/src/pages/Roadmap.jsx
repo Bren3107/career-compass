@@ -5,10 +5,11 @@ import { api } from '../api/client'
 import { useApp } from '../context/AppContext'
 import { StepIndicator } from '../components/StepIndicator'
 import { SkillBadge } from '../components/SkillBadge'
+import { ChatPanel } from '../components/ChatPanel'
 
 export function Roadmap() {
   const navigate = useNavigate()
-  const { skills, analysis, setAnalysis, reset, selectedJob } = useApp()
+  const { skills, analysis, setAnalysis, reset, selectedJob, chatContext, setChatContext } = useApp()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showRoadmap, setShowRoadmap] = useState(!!analysis)
@@ -24,7 +25,7 @@ export function Roadmap() {
     setLoading(true)
     setError('')
     try {
-      const result = await api.analyzeGaps(selectedJob, skills)
+      const result = await api.analyzeGaps(selectedJob, skills, chatContext)
       setAnalysis(result)
       setShowRoadmap(true)
     } catch (err) {
@@ -101,12 +102,24 @@ ${analysis.week4}
           </p>
         </motion.div>
 
-        {!showRoadmap && (
-          <div className="text-center mt-10">
+        {!showRoadmap && !chatContext && (
+          <ChatPanel
+            skills={skills}
+            onComplete={(ctx) => setChatContext(ctx)}
+          />
+        )}
+
+        {!showRoadmap && chatContext && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center mt-10"
+          >
             <button className="primary" onClick={handleGenerateRoadmap} disabled={loading}>
               {loading ? 'Generating Roadmap...' : 'Generate My Roadmap'}
             </button>
-          </div>
+          </motion.div>
         )}
 
         {error && <div className="alert warning">{error}</div>}

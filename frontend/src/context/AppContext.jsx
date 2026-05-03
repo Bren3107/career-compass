@@ -10,6 +10,7 @@ export function AppProvider({ children }) {
   const [pdfText, setPdfText] = useState('')
   const [selectedJob, setSelectedJob] = useState(null)
   const [selectedJobIndex, setSelectedJobIndex] = useState(null)
+  const [chatContext, setChatContext] = useState(null)
 
   const reset = useCallback(() => {
     setSkills([])
@@ -19,6 +20,7 @@ export function AppProvider({ children }) {
     setPdfText('')
     setSelectedJob(null)
     setSelectedJobIndex(null)
+    setChatContext(null)
   }, [])
 
   const value = useMemo(() => ({
@@ -36,8 +38,10 @@ export function AppProvider({ children }) {
     setSelectedJob,
     selectedJobIndex,
     setSelectedJobIndex,
+    chatContext,
+    setChatContext,
     reset,
-  }), [skills, matches, analysis, brainDump, pdfText, selectedJob, selectedJobIndex, reset])
+  }), [skills, matches, analysis, brainDump, pdfText, selectedJob, selectedJobIndex, chatContext, reset])
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

@@ -235,7 +235,12 @@ export function BrainDump() {
               ))}
             </div>
 
-            <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-center"
+            >
               <button
                 className="primary"
                 onClick={() => navigate('/matches')}
@@ -243,7 +248,7 @@ export function BrainDump() {
               >
                 Find My Job Matches →
               </button>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </div>

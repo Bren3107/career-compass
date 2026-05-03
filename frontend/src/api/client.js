@@ -53,9 +53,10 @@ export const api = {
   matchJobs: (skills) => request('/api/match-jobs', 'POST', { skills }),
 
   // POST /api/analyze-gaps
-  analyzeGaps: (job, studentSkills) =>
+  analyzeGaps: (job, studentSkills, chatContext = null) =>
     request('/api/analyze-gaps', 'POST', {
       job,
       student_skills: studentSkills,
+      chat_context: chatContext,
     }),
 }
