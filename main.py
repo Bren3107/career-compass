@@ -24,7 +24,7 @@ from src.config import get_secret
 from src.extractor import extract_skills
 from src.embedder import embed
 from src.matcher import match_jobs
-from src.gap_analyzer import analyze_gaps
+from src.gap_analyzer import analyze_gaps, optimize_resume
 
 # ── Startup validation ────────────────────────────────────────────────────────
 def validate_startup():
@@ -103,6 +103,16 @@ class AnalyzeGapsResponse(BaseModel):
     week4: str
 
 
+class ResumeOptimizeRequest(BaseModel):
+    job_description: str
+    student_skills: list[str]
+
+
+class ResumeOptimizeResponse(BaseModel):
+    missing_skills: list[str]
+    keyword_recommendations: list[str]
+
+
 class ExtractFromPdfResponse(BaseModel):
     text: str
     skills: list[str]
@@ -164,6 +174,19 @@ async def api_analyze_gaps(req: AnalyzeGapsRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gap analysis failed: {e}")
+
+
+@app.post("/api/resume-optimize", response_model=ResumeOptimizeResponse)
+async def api_resume_optimize(req: ResumeOptimizeRequest):
+    """Analyse a raw job description against student skills for resume optimisation."""
+    try:
+        result = optimize_resume(req.job_description, req.student_skills)
+        return ResumeOptimizeResponse(
+            missing_skills=result.get("missing_skills", []),
+            keyword_recommendations=result.get("keyword_recommendations", []),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Resume optimisation failed: {e}")
 
 
 @app.post("/api/extract-from-pdf", response_model=ExtractFromPdfResponse)
