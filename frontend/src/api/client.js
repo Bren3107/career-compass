@@ -59,4 +59,11 @@ export const api = {
       student_skills: studentSkills,
       chat_context: chatContext,
     }),
+
+  // POST /api/resume-optimize
+  resumeOptimize: (jobDescription, studentSkills) =>
+    request('/api/resume-optimize', 'POST', {
+      job_description: jobDescription,
+      student_skills: studentSkills,
+    }),
 }
