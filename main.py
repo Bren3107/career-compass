@@ -187,7 +187,7 @@ async def api_resume_optimize(req: ResumeOptimizeRequest):
             keyword_recommendations=result.get("keyword_recommendations", []),
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Resume optimisation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Resume optimization failed: {e}")
 
 
 @app.post("/api/extract-from-pdf", response_model=ExtractFromPdfResponse)
