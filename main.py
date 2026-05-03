@@ -1,11 +1,12 @@
 """
 main.py — FastAPI backend for Career Compass.
 
-Serves four endpoints for the React frontend:
-- GET  /health              → { status, job_count }
-- POST /api/extract-skills  → { text } → { skills }
-- POST /api/match-jobs      → { skills } → { matches }
-- POST /api/analyze-gaps    → { job, student_skills } → { missing_skills, week1..4 }
+Serves five endpoints for the React frontend:
+- GET  /health                    → { status, job_count }
+- POST /api/extract-skills        → { text } → { skills }
+- POST /api/match-jobs            → { skills } → { matches }
+- POST /api/analyze-gaps          → { job, student_skills } → { missing_skills, week1..4 }
+- POST /api/resume-optimize       → { job_description, student_skills } → { missing_skills, keyword_recommendations }
 
 Run with: uvicorn main:app --reload
 Deploy with: uvicorn main:app --host 0.0.0.0 --port $PORT
